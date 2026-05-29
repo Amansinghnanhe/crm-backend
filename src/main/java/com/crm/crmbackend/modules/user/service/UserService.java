@@ -50,7 +50,7 @@ public class UserService {
 
         userRepository.save(user);
         // 🔥 REAL EMAIL BHEJNE WALI LINE (Ise add karein)
-        emailService.sendEmail(user.getEmail(), "Registration OTP", "Your OTP is: " + user.getOtp());
+//        emailService.sendEmail(user.getEmail(), "Registration OTP", "Your OTP is: " + user.getOtp());
 
         System.out.println("=================================================");
         System.out.println("🔥 REGISTRATION OTP FOR " + user.getEmail() + " IS: " + user.getOtp());

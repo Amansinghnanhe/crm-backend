@@ -33,18 +33,15 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // Yahan matchers change kiye
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/leads/**").hasAnyRole("ADMIN", "USER")
+                        // 🔥 FIX: Dono patterns ko explicit allow kar diya taaki context-path ka issue hi khatam ho jaye
+                        .requestMatchers("/auth/**", "/api/v1/auth/**").permitAll()
+
+                        // Leads ke liye authority matching (ROLE_ prefix filter khud handle karega)
+                        .requestMatchers("/leads/**", "/api/v1/leads/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                        // Baaki saari requests mandatory login maangengi
                         .anyRequest().authenticated()
                 )
-//                .authorizeHttpRequests(auth -> auth
-//                        // Sahi path: /api/v1/auth/ diye hain, toh yahan wahi hona chahiye
-//                        .requestMatchers("/api/v1/auth/**").permitAll()
-//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/api/leads/**").hasAnyRole("ADMIN", "USER")
-//                        .anyRequest().authenticated()
-//                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

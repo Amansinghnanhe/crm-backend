@@ -7,12 +7,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+
     @Autowired
     private JavaMailSender mailSender;
 
     public void sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("aman@unibcomp.net");
+
+        // ✅ FIX: Yahan exact wahi email id honi chahiye jisse login ho raha hai
+        message.setFrom("amannanhe@unibcomp.net");
+
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
