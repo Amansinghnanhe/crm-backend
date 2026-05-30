@@ -23,6 +23,9 @@ public class User {
     @Column(nullable = false, unique = true) // Same email se do accounts nahi ban sakte
     private String email;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Column(nullable = false)
     private String password;
 

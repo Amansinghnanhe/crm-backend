@@ -11,6 +11,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Iski madad se hum check karenge ki email pehle se exists karta hai ya nahi
     boolean existsByEmail(String email);
 
+    boolean existsByPhoneNumber(String phoneNumber);
+
     // Login ke waqt email se user ka password dhoodhne ke liye
     Optional<User> findByEmail(String email);
 }

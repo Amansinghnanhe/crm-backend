@@ -2,6 +2,7 @@ package com.crm.crmbackend.modules.user.service;
 
 import com.crm.crmbackend.config.JwtProvider;
 import com.crm.crmbackend.modules.email.EmailService;
+import com.crm.crmbackend.modules.sms.SmsService;
 import com.crm.crmbackend.modules.user.dto.*;
 import com.crm.crmbackend.modules.user.entity.User;
 import com.crm.crmbackend.modules.user.repository.UserRepository;
@@ -18,12 +19,14 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final EmailService emailService;
+    private final SmsService smsService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider jwtProvider, EmailService emailService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider jwtProvider, EmailService emailService, SmsService  smsService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
         this.emailService = emailService;
+        this.smsService = smsService;
 
     }
 
@@ -41,6 +44,7 @@ public class UserService {
         User user = new User();
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
+        user.setPhoneNumber(dto.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(dto.getRole() != null ? dto.getRole() : "USER");
 
@@ -49,6 +53,9 @@ public class UserService {
         user.setOtpExpiryAt(LocalDateTime.now().plusMinutes(5));
 
         userRepository.save(user);
+
+        String smsBody = "Welcome to CRM, " + user.getName() + "! Your Registration OTP is: " + user.getOtp();
+        smsService.sendSms(user.getPhoneNumber(), smsBody);
         // 🔥 REAL EMAIL BHEJNE WALI LINE (Ise add karein)
 //        emailService.sendEmail(user.getEmail(), "Registration OTP", "Your OTP is: " + user.getOtp());
 
@@ -103,6 +110,9 @@ public class UserService {
         user.setOtp(generateRandomOtp());
         user.setOtpExpiryAt(LocalDateTime.now().plusMinutes(5));
         userRepository.save(user);
+
+        String smsBody = "CRM Password OTP is: " +user.getOtp();
+        smsService.sendSms(user.getPhoneNumber(), smsBody);
 
         System.out.println("=================================================");
         System.out.println("🔑 FORGOT PASSWORD OTP FOR " + email + " IS: " + user.getOtp());

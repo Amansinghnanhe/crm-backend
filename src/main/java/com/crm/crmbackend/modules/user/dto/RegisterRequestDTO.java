@@ -19,6 +19,10 @@ public class RegisterRequestDTO {
     @Email(message = "Invalid email format")
     private String email;
 
+    @NotBlank(message = "Phone number cannot be empty")
+    @Size(min = 10, max = 15,message = "phone number be between 10 and 15 digits")
+    private String phoneNumber;
+
     @NotBlank(message = "Password cannot be empty")
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
