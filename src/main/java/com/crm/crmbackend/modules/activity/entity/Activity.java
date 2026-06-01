@@ -1,6 +1,7 @@
 package com.crm.crmbackend.modules.activity.entity;
 
 import com.crm.crmbackend.modules.lead.entity.Lead;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +31,8 @@ public class Activity {
     // FIX: Quotes ko sahi kiya taaki database crash na ho
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lead_id", nullable = false)
+
+    @JsonIgnoreProperties({"assignedTo", "createdAt"})
     private Lead lead;
 
     private String recordedByEmail;

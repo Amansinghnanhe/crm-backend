@@ -1,6 +1,7 @@
 package com.crm.crmbackend.modules.lead.entity; // Package name fixed
 
 import com.crm.crmbackend.modules.user.entity.User; // User ka sahi import
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,8 @@ public class Lead {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+
+    @JsonIgnoreProperties({"Password", "otp", "otpExpiryAt", "createdAt", "Verified"})
     private User assignedTo;
 
     private LocalDateTime createdAt;

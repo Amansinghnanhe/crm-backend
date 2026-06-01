@@ -5,6 +5,7 @@ import com.crm.crmbackend.modules.activity.service.ActivityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -20,7 +21,7 @@ public class ActivityController {
     }
 
     @PostMapping
-    public ResponseEntity<Activity> logActivity(@PathVariable Long leadId, @RequestBody Activity activity) {
+    public ResponseEntity<Activity> logActivity(@PathVariable Long leadId, @RequestBody Activity activity, java.security.Principal principal) {
 
 //        // 🔥 CONSOLE LOGS: Postman se data aate hi terminal par dikhega
 //        System.out.println("\n==============================================");
@@ -32,6 +33,7 @@ public class ActivityController {
 //        System.out.println("==============================================\n");
 
         // Status code ko bhi 201 Created kar dete hain jo POST ke liye best practice hai
+        activity.setRecordedByEmail(principal.getName());
         return new ResponseEntity<>(activityService.logActivity(leadId, activity), HttpStatus.CREATED);
     }
 
