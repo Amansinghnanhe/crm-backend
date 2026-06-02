@@ -1,5 +1,6 @@
 package com.crm.crmbackend.modules.lead.controller;
 
+import com.crm.crmbackend.modules.lead.dto.LeadResponseDTO; // 👈 DTO import hona zaroori hai
 import com.crm.crmbackend.modules.lead.entity.Lead;
 import com.crm.crmbackend.modules.lead.service.LeadService;
 import org.springframework.http.HttpStatus;
@@ -19,37 +20,36 @@ public class LeadController {
         this.leadService = leadService;
     }
 
-    // 1. POST: Create a New Lead
+    // 1. POST: Create a New Lead (Badalkar LeadResponseDTO kiya)
     @PostMapping
-    public ResponseEntity<Lead> createLead(@RequestBody Lead lead, Principal principal) {
+    public ResponseEntity<LeadResponseDTO> createLead(@RequestBody Lead lead, Principal principal) {
         String loggedInUserEmail = principal.getName();
         return new ResponseEntity<>(leadService.createLead(lead, loggedInUserEmail), HttpStatus.CREATED);
     }
 
-    // 2. PATCH: Update Lead Status (Fixed Method Name Here)
+    // 2. PATCH: Update Lead Status (Badalkar LeadResponseDTO kiya)
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Lead> updateLeadStatus(
+    public ResponseEntity<LeadResponseDTO> updateLeadStatus(
             @PathVariable Long id,
             @RequestParam String status,
             Principal principal) {
         String loggedInUserEmail = principal.getName();
-        // Fixed: LeadService ke 'updatedStatus' method ko sahi naam se call kiya
         return ResponseEntity.ok(leadService.updatedStatus(id, status, loggedInUserEmail));
     }
 
-    // 3. GET: Fetch All Leads
+    // 3. GET: Fetch All Leads (Badalkar List<LeadResponseDTO> kiya)
     @GetMapping
-    public ResponseEntity<List<Lead>> getAllLeads() {
+    public ResponseEntity<List<LeadResponseDTO>> getAllLeads() {
         return ResponseEntity.ok(leadService.getAllLeads());
     }
 
-    // 4. GET: Single Lead by ID
+    // 4. GET: Single Lead by ID (Badalkar LeadResponseDTO kiya)
     @GetMapping("/{id}")
-    public ResponseEntity<Lead> getLeadById(@PathVariable Long id) {
+    public ResponseEntity<LeadResponseDTO> getLeadById(@PathVariable Long id) {
         return ResponseEntity.ok(leadService.getLeadById(id));
     }
 
-    // 5. DELETE: Delete Lead by ID
+    // 5. DELETE: Delete Lead by ID (Yeh String hi return karega)
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLead(@PathVariable Long id) {
         leadService.deleteLead(id);

@@ -1,5 +1,7 @@
 package com.crm.crmbackend.modules.lead.service;
 
+import com.crm.crmbackend.exception.ResourceNotFoundException;
+import com.crm.crmbackend.modules.lead.dto.LeadResponseDTO;
 import com.crm.crmbackend.modules.lead.entity.Lead;
 import com.crm.crmbackend.modules.lead.repository.LeadRepository;
 import com.crm.crmbackend.modules.user.entity.User;
@@ -9,6 +11,7 @@ import com.crm.crmbackend.modules.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LeadService {
@@ -23,11 +26,24 @@ public class LeadService {
         this.activityRepository = activityRepository;
     }
 
-    // 1. New Lead Create karna
+    // Helper Method: Lead Entity ko LeadResponseDTO me convert karne ke liye
+    private LeadResponseDTO convertToDTO(Lead lead) {
+        String agentName = (lead.getAssignedTo() != null) ? lead.getAssignedTo().getName() : "Unassigned";
+        return new LeadResponseDTO(
+                lead.getId(),
+                lead.getName(),
+                lead.getEmail(),
+                lead.getPhone(),
+                lead.getStatus(),
+                agentName
+        );
+    }
+
+    // 1. New Lead Create karna (Method type badal kar LeadResponseDTO kiya)
     @Transactional
-    public Lead createLead(Lead lead, String creatorEmail) {
+    public LeadResponseDTO createLead(Lead lead, String creatorEmail) {
         User user = userRepository.findByEmail(creatorEmail)
-                .orElseThrow(() -> new RuntimeException("Logged in user not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Logged in user not found with email: " + creatorEmail));
         if (lead.getStatus() == null) {
             lead.setStatus("NEW");
         }
@@ -39,48 +55,53 @@ public class LeadService {
         systemLog.setActivityType("SYSTEM");
         systemLog.setDetails("Lead system me create hui aur " + user.getName() + " ko assign ki gayi.");
         systemLog.setRecordedByEmail(creatorEmail);
-        systemLog.setLead(savedLead); // Fixed: Duplicate line yahan se hatayi
+        systemLog.setLead(savedLead);
 
         activityRepository.save(systemLog);
-        return savedLead;
+
+        return convertToDTO(savedLead);
     }
 
-    // 2. Lead Status Update karna (Sahi kiya hua method)
+    // 2. Lead Status Update karna (Method type badal kar LeadResponseDTO kiya)
     @Transactional
-    public Lead updatedStatus(Long leadId, String newStatus, String updatedByEmail) { // Fixed: newString ko newStatus kiya
+    public LeadResponseDTO updatedStatus(Long leadId, String newStatus, String updatedByEmail) {
         Lead lead = leadRepository.findById(leadId)
-                .orElseThrow(() -> new RuntimeException("Lead not found with id: " + leadId));
+                .orElseThrow(() -> new ResourceNotFoundException("Lead not found with id: " + leadId));
 
         String oldStatus = lead.getStatus();
-        lead.setStatus(newStatus); // Ab ye bilkul sahi chalega
+        lead.setStatus(newStatus);
         Lead updatedLead = leadRepository.save(lead);
 
         Activity statusLog = new Activity();
         statusLog.setActivityType("STATUS_UPDATE");
-        // Fixed: String concatenation ko theek kiya taaki naya status bhi print ho
         statusLog.setDetails("Lead status ko '" + oldStatus + "' se badalkar '" + newStatus + "' kiya gya.");
-        statusLog.setRecordedByEmail(updatedByEmail); // Fixed: Spelling error theek ki
+        statusLog.setRecordedByEmail(updatedByEmail);
         statusLog.setLead(updatedLead);
 
         activityRepository.save(statusLog);
-        return updatedLead;
+
+        return convertToDTO(updatedLead);
     }
 
-    // 3. Saari Leads Fetch karna
-    public List<Lead> getAllLeads() {
-        return leadRepository.findAll();
+    // 3. Saari Leads Fetch karna (Syntax structure aur method type fix kiya)
+    public List<LeadResponseDTO> getAllLeads() {
+        return leadRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList()); // 👈 Fixed syntax and spelling here
     }
 
-    // ID se single lead nikalna
-    public Lead getLeadById(Long id) {
-        return leadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lead not found with id: " + id));
+    // 4. ID se single lead nikalna (Method type badal kar LeadResponseDTO kiya)
+    public LeadResponseDTO getLeadById(Long id) {
+        Lead lead = leadRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Lead not found with id: " + id));
+        return convertToDTO(lead);
     }
 
-    // Lead delete karne ke liye
+    // 5. Lead delete karne ke liye
     public void deleteLead(Long id) {
         if (!leadRepository.existsById(id)) {
-            throw new RuntimeException("Lead not found with id: " + id);
+            throw new ResourceNotFoundException("Lead not found with id: " + id);
         }
         leadRepository.deleteById(id);
     }
