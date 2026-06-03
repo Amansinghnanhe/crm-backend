@@ -1,6 +1,7 @@
 package com.crm.crmbackend.modules.lead.service;
 
 import com.crm.crmbackend.exception.ResourceNotFoundException;
+import com.crm.crmbackend.modules.email.EmailService;
 import com.crm.crmbackend.modules.lead.dto.LeadResponseDTO;
 import com.crm.crmbackend.modules.lead.entity.Lead;
 import com.crm.crmbackend.modules.lead.repository.LeadRepository;
@@ -8,6 +9,9 @@ import com.crm.crmbackend.modules.user.entity.User;
 import com.crm.crmbackend.modules.activity.entity.Activity;
 import com.crm.crmbackend.modules.activity.repository.ActivityRepository;
 import com.crm.crmbackend.modules.user.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -19,11 +23,13 @@ public class LeadService {
     private final LeadRepository leadRepository;
     private final UserRepository userRepository;
     private final ActivityRepository activityRepository;
+    private final EmailService emailService;
 
-    public LeadService(LeadRepository leadRepository, UserRepository userRepository, ActivityRepository activityRepository) {
+    public LeadService(LeadRepository leadRepository, UserRepository userRepository, ActivityRepository activityRepository, EmailService emailService) {
         this.leadRepository = leadRepository;
         this.userRepository = userRepository;
         this.activityRepository = activityRepository;
+        this.emailService = emailService;
     }
 
     // Helper Method: Lead Entity ko LeadResponseDTO me convert karne ke liye
@@ -59,6 +65,11 @@ public class LeadService {
 
         activityRepository.save(systemLog);
 
+        String subject = " NEW Lead Assigned: " + savedLead.getName();
+        String body = "Hello " + user.getName() + ",\n\nA new lead named '" + savedLead.getName()+
+                "' has been successfully assigned to you .\n\nPlease check your CRM dashboard. \n\nRegards,\nTeam CRM";
+        emailService.sendEmail(user.getEmail(), subject,body);
+
         return convertToDTO(savedLead);
     }
 
@@ -80,7 +91,24 @@ public class LeadService {
 
         activityRepository.save(statusLog);
 
+        if(updatedLead.getAssignedTo() != null){
+            String subject = " Lead Status Update: " + updatedLead.getName();
+            String body = "The status of lead '" + updatedLead.getName() +"' has been changed from '"
+                    +oldStatus + "'to '"+ newStatus + "' by " + updatedByEmail + ".";
+            emailService.sendEmail(updatedLead.getAssignedTo().getEmail(), subject, body);
+        }
+
         return convertToDTO(updatedLead);
+    }
+    public Page<LeadResponseDTO> getAllLeadsPaged(String status, String search, int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+
+
+        String statusFilter = (status != null && !status.isEmpty()) ? status : null;
+        String searchFilter = (search != null && !search.isEmpty()) ? search : null;
+
+        Page<Lead>  leadPage = leadRepository.findLeadsWithFilters(statusFilter, searchFilter, pageable);
+        return leadPage.map(this::convertToDTO);
     }
 
     // 3. Saari Leads Fetch karna (Syntax structure aur method type fix kiya)

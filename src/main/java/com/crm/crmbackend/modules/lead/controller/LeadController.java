@@ -3,6 +3,7 @@ package com.crm.crmbackend.modules.lead.controller;
 import com.crm.crmbackend.modules.lead.dto.LeadResponseDTO; // 👈 DTO import hona zaroori hai
 import com.crm.crmbackend.modules.lead.entity.Lead;
 import com.crm.crmbackend.modules.lead.service.LeadService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,9 +40,16 @@ public class LeadController {
 
     // 3. GET: Fetch All Leads (Badalkar List<LeadResponseDTO> kiya)
     @GetMapping
-    public ResponseEntity<List<LeadResponseDTO>> getAllLeads() {
-        return ResponseEntity.ok(leadService.getAllLeads());
-    }
+    public ResponseEntity<Page<LeadResponseDTO>> getAllLeads(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search
+    ) {
+        Page<LeadResponseDTO> leadsPage = leadService.getAllLeadsPaged(status, search, page, size);
+        return ResponseEntity.ok(leadsPage);
+}
+
 
     // 4. GET: Single Lead by ID (Badalkar LeadResponseDTO kiya)
     @GetMapping("/{id}")
