@@ -1,6 +1,6 @@
 package com.crm.crmbackend.modules.lead.controller;
 
-import com.crm.crmbackend.modules.lead.dto.LeadResponseDTO; // 👈 DTO import hona zaroori hai
+import com.crm.crmbackend.modules.lead.dto.LeadResponseDTO;
 import com.crm.crmbackend.modules.lead.entity.Lead;
 import com.crm.crmbackend.modules.lead.service.LeadService;
 import org.springframework.data.domain.Page;
@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 @RequestMapping("/leads")
@@ -21,14 +20,14 @@ public class LeadController {
         this.leadService = leadService;
     }
 
-    // 1. POST: Create a New Lead (Badalkar LeadResponseDTO kiya)
+    // 1. POST: Create a New Lead
     @PostMapping
     public ResponseEntity<LeadResponseDTO> createLead(@RequestBody Lead lead, Principal principal) {
         String loggedInUserEmail = principal.getName();
         return new ResponseEntity<>(leadService.createLead(lead, loggedInUserEmail), HttpStatus.CREATED);
     }
 
-    // 2. PATCH: Update Lead Status (Badalkar LeadResponseDTO kiya)
+    // 2. PATCH: Update Lead Status
     @PatchMapping("/{id}/status")
     public ResponseEntity<LeadResponseDTO> updateLeadStatus(
             @PathVariable Long id,
@@ -38,7 +37,8 @@ public class LeadController {
         return ResponseEntity.ok(leadService.updatedStatus(id, status, loggedInUserEmail));
     }
 
-    // 3. GET: Fetch All Leads (Badalkar List<LeadResponseDTO> kiya)
+    // 🔥 FIXED: Duplicate method ko hata kar sirf ek single working method rakha hai 5 parameters ke sath
+    // 3. GET: Fetch All Leads (Paged with Filters)
     @GetMapping
     public ResponseEntity<Page<LeadResponseDTO>> getAllLeads(
             @RequestParam(defaultValue = "0") int page,
@@ -46,18 +46,17 @@ public class LeadController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search
     ) {
-        Page<LeadResponseDTO> leadsPage = leadService.getAllLeadsPaged(status, search, page, size);
+        Page<LeadResponseDTO> leadsPage = leadService.getAllLeadsPaged(null, status, search, page, size);
         return ResponseEntity.ok(leadsPage);
-}
+    }
 
-
-    // 4. GET: Single Lead by ID (Badalkar LeadResponseDTO kiya)
+    // 4. GET: Single Lead by ID
     @GetMapping("/{id}")
     public ResponseEntity<LeadResponseDTO> getLeadById(@PathVariable Long id) {
         return ResponseEntity.ok(leadService.getLeadById(id));
     }
 
-    // 5. DELETE: Delete Lead by ID (Yeh String hi return karega)
+    // 5. DELETE: Delete Lead by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLead(@PathVariable Long id) {
         leadService.deleteLead(id);

@@ -24,7 +24,7 @@ public class DashboardService {
         // 🚀 FIXED: Yahan spelling 'totalActivities' kar di hai taaki niche builder se match ho jaye
         long totalActivities = activityRepository.count();
 
-        List<LeadStatusCountDTO> statusCounts = leadRepository.getLeadsCountGroupedByStatus();
+        List<LeadStatusCountDTO> statusCounts = leadRepository.getLeadsCountGroupedByStatus(null);
 
         return DashboardStatsResponseDTO.builder()
                 .totalLeads(totalLeads)

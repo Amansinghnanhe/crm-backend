@@ -4,6 +4,7 @@ import com.crm.crmbackend.exception.ResourceNotFoundException;
 import com.crm.crmbackend.modules.email.EmailService;
 import com.crm.crmbackend.modules.lead.dto.LeadResponseDTO;
 import com.crm.crmbackend.modules.lead.entity.Lead;
+import com.crm.crmbackend.modules.lead.entity.LeadStatusHistory;
 import com.crm.crmbackend.modules.lead.repository.LeadRepository;
 import com.crm.crmbackend.modules.user.entity.User;
 import com.crm.crmbackend.modules.activity.entity.Activity;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -83,6 +86,14 @@ public class LeadService {
         lead.setStatus(newStatus);
         Lead updatedLead = leadRepository.save(lead);
 
+        LeadStatusHistory history = LeadStatusHistory.builder()
+                .lead(updatedLead)
+                .oldStatus(oldStatus)
+                .newStatus(newStatus)
+                .changeByEmail(updatedByEmail)
+                .changedAt(LocalDateTime.now())
+                .build();
+
         Activity statusLog = new Activity();
         statusLog.setActivityType("STATUS_UPDATE");
         statusLog.setDetails("Lead status ko '" + oldStatus + "' se badalkar '" + newStatus + "' kiya gya.");
@@ -100,14 +111,14 @@ public class LeadService {
 
         return convertToDTO(updatedLead);
     }
-    public Page<LeadResponseDTO> getAllLeadsPaged(String status, String search, int page, int size){
+    public Page<LeadResponseDTO> getAllLeadsPaged( Long userId, String status, String search, int page, int size){
         Pageable pageable = PageRequest.of(page, size);
 
 
         String statusFilter = (status != null && !status.isEmpty()) ? status : null;
         String searchFilter = (search != null && !search.isEmpty()) ? search : null;
 
-        Page<Lead>  leadPage = leadRepository.findLeadsWithFilters(statusFilter, searchFilter, pageable);
+        Page<Lead>  leadPage = leadRepository.findLeadsWithFilters( userId, statusFilter, searchFilter, pageable);
         return leadPage.map(this::convertToDTO);
     }
 

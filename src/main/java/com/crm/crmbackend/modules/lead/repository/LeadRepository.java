@@ -13,16 +13,21 @@ import java.util.List;
 
 @Repository
 public interface LeadRepository extends JpaRepository<Lead, Long> {
-    // Dynamic Filter aur Pagination ke liye Query
+
     @Query("SELECT l FROM Lead l WHERE " +
+            "(:userId IS NULL OR l.assignedTo.id = :userId) AND " +
             "(:status IS NULL OR l.status = :status) AND " +
             "(:search IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(l.email) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Lead> findLeadsWithFilters(
+            @Param("userId") Long userId,
             @Param("status") String status,
             @Param("search") String search,
             Pageable pageable
     );
+
     @Query("SELECT new com.crm.crmbackend.modules.dashboard.dto.LeadStatusCountDTO(l.status, COUNT(l)) " +
-            "FROM Lead l GROUP BY l.status")
-    List<LeadStatusCountDTO> getLeadsCountGroupedByStatus();
+            "FROM Lead l " +
+            "WHERE (:userId IS NULL OR l.assignedTo.id = :userId) " +
+            "GROUP BY l.status")
+    List<LeadStatusCountDTO> getLeadsCountGroupedByStatus(@Param("userId") Long userId);
 }
