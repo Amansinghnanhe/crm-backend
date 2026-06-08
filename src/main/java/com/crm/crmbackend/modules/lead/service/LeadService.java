@@ -6,6 +6,7 @@ import com.crm.crmbackend.modules.lead.dto.LeadResponseDTO;
 import com.crm.crmbackend.modules.lead.entity.Lead;
 import com.crm.crmbackend.modules.lead.entity.LeadStatusHistory;
 import com.crm.crmbackend.modules.lead.repository.LeadRepository;
+import com.crm.crmbackend.modules.lead.repository.LeadStatusHistoryRepository;
 import com.crm.crmbackend.modules.user.entity.User;
 import com.crm.crmbackend.modules.activity.entity.Activity;
 import com.crm.crmbackend.modules.activity.repository.ActivityRepository;
@@ -27,12 +28,14 @@ public class LeadService {
     private final UserRepository userRepository;
     private final ActivityRepository activityRepository;
     private final EmailService emailService;
+    private final LeadStatusHistoryRepository leadStatusHistoryRepository;
 
-    public LeadService(LeadRepository leadRepository, UserRepository userRepository, ActivityRepository activityRepository, EmailService emailService) {
+    public LeadService(LeadRepository leadRepository, UserRepository userRepository, ActivityRepository activityRepository, EmailService emailService, LeadStatusHistoryRepository leadStatusHistoryRepository) {
         this.leadRepository = leadRepository;
         this.userRepository = userRepository;
         this.activityRepository = activityRepository;
         this.emailService = emailService;
+        this.leadStatusHistoryRepository = leadStatusHistoryRepository;
     }
 
     // Helper Method: Lead Entity ko LeadResponseDTO me convert karne ke liye
@@ -93,6 +96,7 @@ public class LeadService {
                 .changeByEmail(updatedByEmail)
                 .changedAt(LocalDateTime.now())
                 .build();
+        leadStatusHistoryRepository.save(history);
 
         Activity statusLog = new Activity();
         statusLog.setActivityType("STATUS_UPDATE");

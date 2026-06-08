@@ -30,11 +30,11 @@ public class LeadController {
     // 2. PATCH: Update Lead Status
     @PatchMapping("/{id}/status")
     public ResponseEntity<LeadResponseDTO> updateLeadStatus(
-            @PathVariable Long id,
+            @PathVariable Long leadId,
             @RequestParam String status,
             Principal principal) {
         String loggedInUserEmail = principal.getName();
-        return ResponseEntity.ok(leadService.updatedStatus(id, status, loggedInUserEmail));
+        return ResponseEntity.ok(leadService.updatedStatus(leadId, status, loggedInUserEmail));
     }
 
     // 🔥 FIXED: Duplicate method ko hata kar sirf ek single working method rakha hai 5 parameters ke sath
