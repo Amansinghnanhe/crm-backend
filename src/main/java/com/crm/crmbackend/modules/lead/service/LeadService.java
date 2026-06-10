@@ -115,14 +115,17 @@ public class LeadService {
 
         return convertToDTO(updatedLead);
     }
-    public Page<LeadResponseDTO> getAllLeadsPaged( Long userId, String status, String search, int page, int size){
+    public Page<LeadResponseDTO> getAllLeadsPaged(  String agentEmail, String status, String search, int page, int size){
         Pageable pageable = PageRequest.of(page, size);
 
 
         String statusFilter = (status != null && !status.isEmpty()) ? status : null;
         String searchFilter = (search != null && !search.isEmpty()) ? search : null;
 
-        Page<Lead>  leadPage = leadRepository.findLeadsWithFilters( userId, statusFilter, searchFilter, pageable);
+        User user = userRepository.findByEmail(agentEmail)
+                .orElseThrow(()-> new ResourceNotFoundException("User not found with email: "+ agentEmail));
+
+        Page<Lead>  leadPage = leadRepository.findLeadsWithFilters( user.getId(), statusFilter, searchFilter, pageable);
         return leadPage.map(this::convertToDTO);
     }
 
@@ -131,7 +134,7 @@ public class LeadService {
         return leadRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList()); // 👈 Fixed syntax and spelling here
+                .collect(Collectors.toList()); //  Fixed syntax and spelling here
     }
 
     // 4. ID se single lead nikalna (Method type badal kar LeadResponseDTO kiya)

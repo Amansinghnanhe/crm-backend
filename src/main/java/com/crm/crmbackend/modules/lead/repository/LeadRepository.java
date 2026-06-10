@@ -30,4 +30,5 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
             "WHERE (:userId IS NULL OR l.assignedTo.id = :userId) " +
             "GROUP BY l.status")
     List<LeadStatusCountDTO> getLeadsCountGroupedByStatus(@Param("userId") Long userId);
+    long countByAssignedToId(Long userId);
 }

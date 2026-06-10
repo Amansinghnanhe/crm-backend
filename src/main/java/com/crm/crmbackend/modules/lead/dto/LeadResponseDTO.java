@@ -22,18 +22,24 @@ public class LeadResponseDTO {
 
     }
     public String getName() {
+
+
         return name;
     }
     public String getEmail() {
+
         return email;
     }
     public String getPhone() {
+
         return phone;
     }
     public String getStatus() {
+
         return status;
     }
     public String getAssignedToAgentName() {
+
         return assignedToAgentName;
     }
 }

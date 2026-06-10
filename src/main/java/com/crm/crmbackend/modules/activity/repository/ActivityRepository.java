@@ -10,4 +10,6 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     // Sahi naam: findByLeadId... (kyunki argument Long leadId hai)
     List<Activity> findByLeadIdOrderByActivityDateDesc(Long leadId);
+
+    long countByRecordedByEmail(String email);
 }

@@ -30,7 +30,7 @@ public class LeadController {
     // 2. PATCH: Update Lead Status
     @PatchMapping("/{id}/status")
     public ResponseEntity<LeadResponseDTO> updateLeadStatus(
-            @PathVariable Long leadId,
+            @PathVariable ("id") Long leadId,
             @RequestParam String status,
             Principal principal) {
         String loggedInUserEmail = principal.getName();
@@ -41,18 +41,20 @@ public class LeadController {
     // 3. GET: Fetch All Leads (Paged with Filters)
     @GetMapping
     public ResponseEntity<Page<LeadResponseDTO>> getAllLeads(
+            Principal principal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search
     ) {
+        String agentEmail = principal.getName();
         Page<LeadResponseDTO> leadsPage = leadService.getAllLeadsPaged(null, status, search, page, size);
         return ResponseEntity.ok(leadsPage);
     }
 
     // 4. GET: Single Lead by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<LeadResponseDTO> getLeadById(@PathVariable Long id) {
+    @GetMapping("/{id}/history")
+    public ResponseEntity<LeadResponseDTO> getLeadById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(leadService.getLeadById(id));
     }
 

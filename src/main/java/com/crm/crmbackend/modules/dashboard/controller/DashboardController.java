@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -21,7 +22,9 @@ public class DashboardController {
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<DashboardStatsResponseDTO> getStats() {
-        return ResponseEntity.ok(dashboardService.getDashboardStats());
+    public ResponseEntity<DashboardStatsResponseDTO> getStats(Principal principal) {
+
+        String loggedInUserEmail = principal.getName();
+        return ResponseEntity.ok(dashboardService.getDashboardStats(loggedInUserEmail));
     }
 }
