@@ -4,6 +4,7 @@ import com.crm.crmbackend.config.JwtProvider;
 import com.crm.crmbackend.modules.email.EmailService;
 import com.crm.crmbackend.modules.sms.SmsService;
 import com.crm.crmbackend.modules.user.dto.*;
+import com.crm.crmbackend.modules.user.entity.Role;
 import com.crm.crmbackend.modules.user.entity.User;
 import com.crm.crmbackend.modules.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +47,12 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setPhoneNumber(dto.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(dto.getRole() != null ? dto.getRole() : "USER");
+        if(dto.getRole() != null){
+            user.setRole(Role.valueOf(dto.getRole().toUpperCase()));
+        } else {
+            user.setRole(Role.ROLE_AGENT);
+        }
+//        user.setRole(dto.getRole() != null ? dto.getRole() : "USER");
 
         user.setVerified(false); // Lombok boolean primitive setter
         user.setOtp(generateRandomOtp());
@@ -99,8 +105,8 @@ public class UserService {
             throw new RuntimeException("Invalid email or password!");
         }
 
-        String token = jwtProvider.generateToken(user.getEmail(), user.getRole());
-        return new LoginResponseDTO(true, "Login successful", token, user.getRole());
+        String token = jwtProvider.generateToken(user.getEmail(), user.getRole().name());
+        return new LoginResponseDTO(true, "Login successful", token, user.getRole().name());
     }
 
     public String forgotPassword(String email) {

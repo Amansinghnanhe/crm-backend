@@ -29,8 +29,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role; // Jaise: ADMIN, USER
+//    private String role; // Jaise: ADMIN, USER
+    private Role role;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

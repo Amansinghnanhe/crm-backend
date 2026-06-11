@@ -48,7 +48,7 @@ public class LeadController {
             @RequestParam(required = false) String search
     ) {
         String agentEmail = principal.getName();
-        Page<LeadResponseDTO> leadsPage = leadService.getAllLeadsPaged(null, status, search, page, size);
+        Page<LeadResponseDTO> leadsPage = leadService.getAllLeadsPaged(agentEmail, status, search, page, size);
         return ResponseEntity.ok(leadsPage);
     }
 

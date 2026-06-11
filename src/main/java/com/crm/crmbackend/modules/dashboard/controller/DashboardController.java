@@ -12,7 +12,9 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/dashboard")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://loaclhost:5173")
+
 public class DashboardController {
 
     private final DashboardService dashboardService;

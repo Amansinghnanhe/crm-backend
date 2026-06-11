@@ -18,7 +18,7 @@ public class LeadStatusHistory {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lead_id, nullable = false")
+    @JoinColumn(name = "lead_id", nullable = false)
     private Lead lead;
 
     private String oldStatus;

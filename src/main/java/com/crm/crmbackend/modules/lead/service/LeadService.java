@@ -7,6 +7,7 @@ import com.crm.crmbackend.modules.lead.entity.Lead;
 import com.crm.crmbackend.modules.lead.entity.LeadStatusHistory;
 import com.crm.crmbackend.modules.lead.repository.LeadRepository;
 import com.crm.crmbackend.modules.lead.repository.LeadStatusHistoryRepository;
+import com.crm.crmbackend.modules.user.entity.Role;
 import com.crm.crmbackend.modules.user.entity.User;
 import com.crm.crmbackend.modules.activity.entity.Activity;
 import com.crm.crmbackend.modules.activity.repository.ActivityRepository;
@@ -124,6 +125,12 @@ public class LeadService {
 
         User user = userRepository.findByEmail(agentEmail)
                 .orElseThrow(()-> new ResourceNotFoundException("User not found with email: "+ agentEmail));
+
+        Long userIdFilter = null;
+
+        if(user.getRole() == Role.ROLE_AGENT){
+            userIdFilter = user.getId();
+        }
 
         Page<Lead>  leadPage = leadRepository.findLeadsWithFilters( user.getId(), statusFilter, searchFilter, pageable);
         return leadPage.map(this::convertToDTO);
