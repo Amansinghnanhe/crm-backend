@@ -40,7 +40,6 @@ public class LeadController {
         return ResponseEntity.ok(leadService.updatedStatus(leadId, status, loggedInUserEmail));
     }
 
-    // 3. GET: Fetch All Leads (Paged with Filters)
     @GetMapping
     public ResponseEntity<Page<LeadResponseDTO>> getAllLeads(
             Principal principal,
