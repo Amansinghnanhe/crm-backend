@@ -7,6 +7,7 @@ import com.crm.crmbackend.modules.lead.entity.Lead;
 import com.crm.crmbackend.modules.lead.entity.LeadStatusHistory;
 import com.crm.crmbackend.modules.lead.repository.LeadRepository;
 import com.crm.crmbackend.modules.lead.repository.LeadStatusHistoryRepository;
+import com.crm.crmbackend.modules.lead.util.ExcelHelper;
 import com.crm.crmbackend.modules.user.entity.Role;
 import com.crm.crmbackend.modules.user.entity.User;
 import com.crm.crmbackend.modules.activity.entity.Activity;
@@ -17,7 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -157,5 +160,46 @@ public class LeadService {
             throw new ResourceNotFoundException("Lead not found with id: " + id);
         }
         leadRepository.deleteById(id);
+    }
+
+
+    @Transactional
+    public void saveExcelLeads(MultipartFile file, String loggedInUserEmail) {
+        try {
+            // 1. Excel to Entity Conversion Utility Class ko trigger kiya
+            List<Lead> leads = ExcelHelper.excelToLeads(file.getInputStream());
+
+            // 2. Token email se current authentic agent context fetch kiya
+            User currentAgent = userRepository.findByEmail(loggedInUserEmail)
+                    .orElseThrow(() -> new ResourceNotFoundException("Logged in user not found with email: " + loggedInUserEmail));
+
+            // 3. Sari dynamic leads ko is unique Agent ID par lock kiya
+            for (Lead lead : leads) {
+                lead.setAssignedTo(currentAgent);
+                if (lead.getStatus() == null || lead.getStatus().isEmpty()) {
+                    lead.setStatus("NEW");
+                }
+            }
+
+            // 4. Batch Performance Injection into MySQL Table
+            List<Lead> savedLeads = leadRepository.saveAll(leads);
+
+            // 5. System Task Audit trail save kiya Activity Repository me
+            Activity bulkImportLog = new Activity();
+            bulkImportLog.setActivityType("SYSTEM_BULK_IMPORT");
+            bulkImportLog.setDetails("Excel sheet se kul " + savedLeads.size() + " leads system me bulk-import ki gayi hain.");
+            bulkImportLog.setRecordedByEmail(loggedInUserEmail);
+            activityRepository.save(bulkImportLog);
+
+            // 6. Final Summary Notification Email Trigger
+            String subject = "📊 CRM Bulk Lead Import Summary Notification";
+            String body = "Hello " + currentAgent.getName() + ",\n\nYour Excel sheet processing is complete.\n" +
+                    "Total " + savedLeads.size() + " leads have been successfully mapped and uploaded into your account.\n\n" +
+                    "Please check your LeadFlux pipeline dashboard.\n\nRegards,\nTeam LeadFlux Backend Engine";
+            emailService.sendEmail(currentAgent.getEmail(), subject, body);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Excel data save karne me takleef aayi hai: " + e.getMessage());
+        }
     }
 }
