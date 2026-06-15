@@ -25,4 +25,11 @@ public class LeadStatusHistory {
     private String newStatus;
     private String changeByEmail;
     private LocalDateTime changedAt;
+
+    @PrePersist
+    protected void onCreation() {
+        if (this.changedAt == null) {
+            this.changedAt = LocalDateTime.now();
+        }
+    }
 }

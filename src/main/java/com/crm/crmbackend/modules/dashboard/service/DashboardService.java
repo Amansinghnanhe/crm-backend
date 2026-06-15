@@ -7,7 +7,7 @@ import com.crm.crmbackend.modules.dashboard.dto.DashboardStatsResponseDTO;
 import com.crm.crmbackend.modules.dashboard.dto.LeadStatusCountDTO;
 import com.crm.crmbackend.modules.user.entity.Role;
 import com.crm.crmbackend.modules.user.repository.UserRepository;
-import com.crm.crmbackend.modules.user.entity.User; // 🔥 FIXED: User entity import missing thi
+import com.crm.crmbackend.modules.user.entity.User; //  FIXED: User entity import missing thi
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class DashboardService {
     private final ActivityRepository activityRepository;
     private final UserRepository userRepository;
 
-    // 🔥 FIXED: Constructor me UserRepository ko accept kiya taaki Spring properly inject kar sake
+    // FIXED: Constructor me UserRepository ko accept kiya taaki Spring properly inject kar sake
     public DashboardService(LeadRepository leadRepository, ActivityRepository activityRepository, UserRepository userRepository) {
         this.leadRepository = leadRepository;
         this.activityRepository = activityRepository;
@@ -33,7 +33,9 @@ public class DashboardService {
         long totalLeads;
         long totalActivities;
         List<LeadStatusCountDTO> statusCounts;
-        if (user.getRole()== Role.ROLE_AGENT) {
+
+//        if (user.getRole()== Role.ROLE_AGENT) {
+            if (user.getRole()!=null && "ROLE_AGENT".equalsIgnoreCase(user.getRole().toString())){
             totalLeads = leadRepository.countByAssignedToId(user.getId());
             totalActivities = activityRepository.countByRecordedByEmail(agentEmail);
             statusCounts = leadRepository.getLeadsCountGroupedByStatus(user.getId());
@@ -44,16 +46,7 @@ public class DashboardService {
         }
 
 
-//        // 2.  FIXED: user.getId() kiya (comma hataya) aur repository name sahi kiya
-//        long totalLeads = leadRepository.countByAssignedToId(user.getId());
-//
-//        // 3.  FIXED: Method name 'countByRecordedByEmail' kiya jo standard repository se match kare
-//        long totalActivities = activityRepository.countByRecordedByEmail(agentEmail);
-//
-//        // 4.  FIXED: user.getId() ka syntax correct kiya aur duplicate logic hata diya
-//        List<LeadStatusCountDTO> statusCounts = leadRepository.getLeadsCountGroupedByStatus(user.getId());
-
-        // 5. Clean builder response return kiya
+        //  Clean builder response return kiya
         return DashboardStatsResponseDTO.builder()
                 .totalLeads(totalLeads)
                 .totalActivities(totalActivities)

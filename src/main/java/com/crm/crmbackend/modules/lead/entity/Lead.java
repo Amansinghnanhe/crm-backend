@@ -25,7 +25,8 @@ public class Lead {
     @ManyToOne
     @JoinColumn(name = "user_id")
 
-    @JsonIgnoreProperties({"Password", "otp", "otpExpiryAt", "createdAt", "Verified"})
+    @JsonIgnoreProperties({"Password", "otp", "otpExpiryAt", "createdAt", "Verified", "roles", "handler", "hibernateLazyInitializer"})
+
     private User assignedTo;
 
     private LocalDateTime createdAt;

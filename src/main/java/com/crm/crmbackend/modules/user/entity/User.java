@@ -41,6 +41,9 @@ public class User {
     @Column(name = "is_verified")
     private boolean isVerified = false;
 
+    @Column(name = "active")
+    private boolean active = true;
+
     @Column(name = "otp")
     private String otp;
 

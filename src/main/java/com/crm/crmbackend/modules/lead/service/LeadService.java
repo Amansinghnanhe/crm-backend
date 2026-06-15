@@ -131,11 +131,14 @@ public class LeadService {
 
         Long userIdFilter = null;
 
-        if(user.getRole() == Role.ROLE_AGENT){
+//        if(user.getRole() == Role.ROLE_AGENT){
+//            userIdFilter = user.getId();
+//        }
+        if (user.getRole() != null && "ROLE_AGENT".equalsIgnoreCase(user.getRole().toString())) {
             userIdFilter = user.getId();
         }
 
-        Page<Lead>  leadPage = leadRepository.findLeadsWithFilters( user.getId(), statusFilter, searchFilter, pageable);
+        Page<Lead>  leadPage = leadRepository.findLeadsWithFilters( userIdFilter, statusFilter, searchFilter, pageable);
         return leadPage.map(this::convertToDTO);
     }
 
