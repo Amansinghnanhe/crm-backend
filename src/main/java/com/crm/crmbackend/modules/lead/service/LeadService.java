@@ -16,6 +16,7 @@ import com.crm.crmbackend.modules.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -119,8 +120,9 @@ public class LeadService {
 
         return convertToDTO(updatedLead);
     }
-    public Page<LeadResponseDTO> getAllLeadsPaged(  String agentEmail, String status, String search, int page, int size){
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<LeadResponseDTO> getAllLeadsPaged(  String agentEmail, String status, String search, int page, int size, String sortBy, String sortDir){
+        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
 
 
         String statusFilter = (status != null && !status.isEmpty()) ? status : null;

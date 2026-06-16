@@ -11,7 +11,8 @@ import java.util.List;
 @RestController
 // 👇 Fix: Humne URL variable ka naam '{leadId}' kar diya hai taaki method se match kare
 @RequestMapping("/leads/{leadId}/activities")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "*")
 public class ActivityController {
 
     private final ActivityService activityService;
@@ -38,7 +39,7 @@ public class ActivityController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Activity>> getLeadHistory(@PathVariable Long leadId) {
+    public ResponseEntity<List<Activity>> getLeadHistory(@PathVariable Long leadId, @RequestBody Activity activity, Principal principal) {
 
 //        // 🔥 CONSOLE LOGS: History fetch karte waqt dikhega
 //        System.out.println("\n==============================================");

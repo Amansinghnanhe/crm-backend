@@ -3,10 +3,8 @@ package com.crm.crmbackend.modules.activity.entity;
 import com.crm.crmbackend.modules.lead.entity.Lead;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,6 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Activity {
 
     @Id
@@ -26,16 +25,17 @@ public class Activity {
     @Column(columnDefinition = "TEXT") // @Lob se behtar aur safe tarika lamba text store karne ka
     private String details;
 
+    private String recordedByEmail;
+
     private LocalDateTime activityDate;
 
     // FIX: Quotes ko sahi kiya taaki database crash na ho
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lead_id", nullable = false)
 
-    @JsonIgnoreProperties({"assignedTo", "createdAt"})
+    @JsonIgnoreProperties({"assignedTo", "createdAt", "handler", "hibernateLazyInitializer"})
     private Lead lead;
 
-    private String recordedByEmail;
 
     @PrePersist
     protected void onCreate() {

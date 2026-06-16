@@ -45,11 +45,13 @@ public class LeadController {
             Principal principal,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt")  String sortBy,
+            @RequestParam(defaultValue = "desc")  String sortDir,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search
     ) {
         String agentEmail = principal.getName();
-        Page<LeadResponseDTO> leadsPage = leadService.getAllLeadsPaged(agentEmail, status, search, page, size);
+        Page<LeadResponseDTO> leadsPage = leadService.getAllLeadsPaged(agentEmail, status, search, page, size, sortBy, sortDir);
         return ResponseEntity.ok(leadsPage);
     }
 
