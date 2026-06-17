@@ -14,10 +14,15 @@ import java.util.List;
 @Repository
 public interface LeadRepository extends JpaRepository<Lead, Long> {
 
-    @Query("SELECT l FROM Lead l WHERE " +
+    // ⚡ OPTIMIZED: 'LEFT JOIN FETCH l.assignedTo' add kiya hai taaki N+1 problem na aaye aur agent ka naam fast load ho.
+    @Query(value = "SELECT l FROM Lead l LEFT JOIN FETCH l.assignedTo WHERE " +
             "(:userId IS NULL OR l.assignedTo.id = :userId) AND " +
             "(:status IS NULL OR l.status = :status) AND " +
-            "(:search IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(l.email) LIKE LOWER(CONCAT('%', :search, '%')))")
+            "(:search IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(l.email) LIKE LOWER(CONCAT('%', :search, '%')))",
+            countQuery = "SELECT COUNT(l) FROM Lead l WHERE " +
+                    "(:userId IS NULL OR l.assignedTo.id = :userId) AND " +
+                    "(:status IS NULL OR l.status = :status) AND " +
+                    "(:search IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(l.email) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Lead> findLeadsWithFilters(
             @Param("userId") Long userId,
             @Param("status") String status,
@@ -25,10 +30,13 @@ public interface LeadRepository extends JpaRepository<Lead, Long> {
             Pageable pageable
     );
 
+    //  Yeh query bilkul sahi hai, isme koi change nahi karna!
     @Query("SELECT new com.crm.crmbackend.modules.dashboard.dto.LeadStatusCountDTO(l.status, COUNT(l)) " +
             "FROM Lead l " +
             "WHERE (:userId IS NULL OR l.assignedTo.id = :userId) " +
             "GROUP BY l.status")
     List<LeadStatusCountDTO> getLeadsCountGroupedByStatus(@Param("userId") Long userId);
+
+    //  Yeh bhi bilkul sahi hai!
     long countByAssignedToId(Long userId);
 }

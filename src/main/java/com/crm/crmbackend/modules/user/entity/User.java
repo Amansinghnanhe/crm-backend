@@ -50,6 +50,9 @@ public class User {
     @Column(name = "otp_expiry_at")
     private LocalDateTime otpExpiryAt;
 
+    @OneToOne(mappedBy = "assignedAgent", cascade = {CascadeType.PERSIST, CascadeType.MERGE},  fetch = FetchType.LAZY)
+    private java.util.List<com.crm.crmbackend.modules.lead.entity.Lead> leads;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now(); // Record insert hote hi current time automatic set hoga
