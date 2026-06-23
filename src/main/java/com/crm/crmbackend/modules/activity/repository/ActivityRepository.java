@@ -8,8 +8,9 @@ import java.util.List;
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
-    // Sahi naam: findByLeadId... (kyunki argument Long leadId hai)
-    List<Activity> findByLeadIdOrderByActivityDateDesc(Long leadId);
+
+//    List<Activity> findByLeadIdOrderByActivityDateDesc(Long leadId);
+    List<Activity> findByLeadIdOrderByCreatedAtDesc(Long leadId);
 
     long countByRecordedByEmail(String email);
 }

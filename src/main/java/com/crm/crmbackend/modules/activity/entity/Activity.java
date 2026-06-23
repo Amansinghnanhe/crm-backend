@@ -27,7 +27,8 @@ public class Activity {
 
     private String recordedByEmail;
 
-    private LocalDateTime activityDate;
+//    private LocalDateTime activityDate;
+    private LocalDateTime createdAt;
 
     // FIX: Quotes ko sahi kiya taaki database crash na ho
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,8 +40,8 @@ public class Activity {
 
     @PrePersist
     protected void onCreate() {
-        if (this.activityDate == null) {
-            this.activityDate = LocalDateTime.now();
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
         }
     }
 }
