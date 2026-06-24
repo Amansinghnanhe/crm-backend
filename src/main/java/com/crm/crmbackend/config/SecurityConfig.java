@@ -36,6 +36,8 @@ public class SecurityConfig {
                         // 🔥 FIX: Dono patterns ko explicit allow kar diya taaki context-path ka issue hi khatam ho jaye
                         .requestMatchers("/auth/**", "/api/v1/auth/**").permitAll()
 
+                        .requestMatchers("/ws/**").permitAll()
+
                         // Leads ke liye authority matching (ROLE_ prefix filter khud handle karega)
                         .requestMatchers("/leads/**", "/api/v1/leads/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 

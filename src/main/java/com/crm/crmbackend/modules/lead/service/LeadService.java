@@ -17,9 +17,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -34,13 +36,15 @@ public class LeadService {
     private final ActivityRepository activityRepository;
     private final EmailService emailService;
     private final LeadStatusHistoryRepository leadStatusHistoryRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public LeadService(LeadRepository leadRepository, UserRepository userRepository, ActivityRepository activityRepository, EmailService emailService, LeadStatusHistoryRepository leadStatusHistoryRepository) {
+    public LeadService(LeadRepository leadRepository, UserRepository userRepository, ActivityRepository activityRepository, EmailService emailService, LeadStatusHistoryRepository leadStatusHistoryRepository, SimpMessagingTemplate messagingTemplate) {
         this.leadRepository = leadRepository;
         this.userRepository = userRepository;
         this.activityRepository = activityRepository;
         this.emailService = emailService;
         this.leadStatusHistoryRepository = leadStatusHistoryRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     // Helper Method: Lead Entity ko LeadResponseDTO me convert karne ke liye
@@ -80,6 +84,9 @@ public class LeadService {
         String body = "Hello " + user.getName() + ",\n\nA new lead named '" + savedLead.getName()+
                 "' has been successfully assigned to you .\n\nPlease check your CRM dashboard. \n\nRegards,\nTeam CRM";
         emailService.sendEmail(user.getEmail(), subject,body);
+
+        String wsPayload = "{\"event\": \"LEAD_CREATED\", \"leadId\": " + savedLead.getId() + ", \"leadName\": \"" + savedLead.getName() + "\", \"status\": \"" + savedLead.getStatus() + "\"}";
+        messagingTemplate.convertAndSend("/topic/leads", wsPayload);
 
         return convertToDTO(savedLead);
     }
